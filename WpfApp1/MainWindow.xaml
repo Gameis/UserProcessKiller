@@ -6,7 +6,8 @@
         mc:Ignorable="d"
         Title="Title" Height="300" Width="500"
         WindowStyle="ThreeDBorderWindow"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize"
+        KeyDown="MainWindow_OnKeyDown">
     <Window.Resources>
         <Style x:Key="BtnStyle">
             <Setter Property="Button.BorderBrush" Value="Indigo"/>
