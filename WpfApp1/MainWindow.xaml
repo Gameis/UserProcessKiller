@@ -21,36 +21,42 @@
             <RowDefinition Height="182*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="235*"/>
-            <ColumnDefinition Width="57*"/>
+            <ColumnDefinition Width="199*"/>
+            <ColumnDefinition Width="48*"/>
         </Grid.ColumnDefinitions>
         <TextBlock Grid.Row="0" Grid.Column="1" Name="TimeDisplay" TextAlignment="Center" ToolTip=""/>
+        <Button Margin="5" Content="Add to Autorun" Grid.Row="0" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="SetAutorun_OnClick"/>
+
         <StackPanel Grid.Row="1" Grid.Column="0">
             <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <Button Margin="5" Content="Kill Task Manager" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="DelTaskMngr_OnClick"/>
-                <Button Margin="5" Content="Enable Task Manager" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="EnableTaskMngr_OnClick"/>
+                <Button Margin="5" Content="Kill Task Manager" Grid.Row="0" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="DelTaskMngr_OnClick"/>
+                <Button Margin="5" Content="Enable Task Manager" Grid.Row="0" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="EnableTaskMngr_OnClick"/>
+                
+                <Button Margin="5" Content="Kill Start Menu" Grid.Row="1" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="DelStartMenu_OnClick"/>
+                <Button Margin="5" Content="Enable Start Menu" Grid.Row="1" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="EnableStartMenu_OnClick"/>
+                
+                <Button Margin="5" Content="Kill Win Keys" Grid.Row="2" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="DisableWinKeys_OnClick"/>
+                <Button Margin="5" Content="Enable Win Keys" Grid.Row="2" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="EnableWinKeys_OnClick"/>
+                
+                <Button Margin="5" Content="Soft reboot" Grid.Row="3" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="SoftReboot_OnClick"/>
+                <Button Margin="5" Content="Hard reboot" Grid.Row="3" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="HardReboot_OnClick"/>
+
+                <Button Margin="5" Content="Soft Poweroff" Grid.Row="4" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="SoftPoweroff_OnClick"/>
+                <Button Margin="5" Content="Hard Poweroff" Grid.Row="4" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="HardPoweroff_OnClick"/>
+
             </Grid>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <Button Margin="5" Content="Kill Start Menu" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="DelStartMenu_OnClick"/>
-                <Button Margin="5" Content="Enable Start Menu" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="EnableStartMenu_OnClick"/>
-            </Grid>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <Button Margin="5" Content="Kill Win Keys" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="DisableWinKeys_OnClick"/>
-                <Button Margin="5" Content="Enable Win Keys" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="EnableWinKeys_OnClick"/>
-            </Grid>
-            <Button Margin="5" Content="Enable Closig" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="SwitchOnClose_OnClick"/>
+            <Button Margin="5" Content="Enable Closig" Style="{StaticResource BtnStyle}" Click="SwitchOnClose_OnClick"/>
         </StackPanel>
     </Grid>
 </Window>

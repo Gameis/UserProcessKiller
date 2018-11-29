@@ -12,6 +12,7 @@ namespace WpfApp1
 {
     public partial class MainWindow : Window {
 		private AddHooks hooks = new AddHooks();
+		private Reboot rebootController = new Reboot();
 		private DispatcherTimer _timer;
 		private bool _canClose = false;
 		public TextBlock TimeDisplay1 {
@@ -32,10 +33,19 @@ namespace WpfApp1
 
 		private void DisableButtons() {
 			try {
-				RegistryKey regKey = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\");
-				regKey.SetValue("NoWinKeys", "1");
-				regKey.Close();
-            }
+				RegistryKey regKey =
+					Registry.LocalMachine.CreateSubKey("SYSTEM\\CurrentControlSet\\Control\\Keyboard Layout");
+				regKey.SetValue("Scancode map", 
+								new byte[]{
+									  0x00, 0x00, 0x00, 0x00,
+									  0x00, 0x00, 0x00, 0x00,
+									  0x03, 0x00, 0x00, 0x00,
+									  0x00, 0x00, 0x5B, 0xE0,
+									  0x00, 0x00, 0x5C, 0xE0,
+									  0x00, 0x00, 0x00, 0x00
+								}
+				);
+			}
 			catch (Exception e) {
 				MessageBox.Show(e.ToString());
 			}
@@ -44,11 +54,9 @@ namespace WpfApp1
 		private void EnableButtons() {
 			try
 			{
-				string subKey = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer";
-				RegistryKey rk = Registry.CurrentUser;
-				RegistryKey sk1 = rk.OpenSubKey(subKey);
-				if (sk1 != null)
-					rk.DeleteSubKeyTree(subKey);
+				RegistryKey regKey =
+					Registry.LocalMachine.CreateSubKey("SYSTEM\\CurrentControlSet\\Control\\Keyboard Layout");
+				regKey?.DeleteValue("Scancode map");
 			}
 			catch (Exception ex)
 			{
@@ -95,7 +103,7 @@ namespace WpfApp1
 			}
         }
 
-		private void SetAutoRunValue(bool value) {
+		private void SetAutoRunValue() {
 			RegistryKey regKey = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run\\");
 			regKey?.SetValue("MyApp", Assembly.GetExecutingAssembly().Location);
 			regKey?.Close();
@@ -118,6 +126,26 @@ namespace WpfApp1
 				MessageBox.Show(exception.ToString());
 			}
 			
+		}
+
+		private void SoftReboot_OnClick(object sender, RoutedEventArgs e) {
+			rebootController.Halt(true, false);
+		}
+
+		private void HardReboot_OnClick(object sender, RoutedEventArgs e) {
+			rebootController.Halt(true, true);
+		}
+
+		private void SoftPoweroff_OnClick(object sender, RoutedEventArgs e) {
+			rebootController.Halt(false, false);
+		}
+
+		private void HardPoweroff_OnClick(object sender, RoutedEventArgs e) {
+			rebootController.Halt(false, true);
+		}
+
+		private void SetAutorun_OnClick(object sender, RoutedEventArgs e) {
+			SetAutoRunValue();
 		}
 	}
 }
