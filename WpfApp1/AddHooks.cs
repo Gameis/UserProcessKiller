@@ -115,7 +115,7 @@ namespace WpfApp1
             }
         }
 
-		void OnClose() {
+		public void OnClose() {
 			UnhookWindowsHookEx(intLLKey);
         }
 

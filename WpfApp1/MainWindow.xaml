@@ -6,8 +6,8 @@
         mc:Ignorable="d"
         Title="Title" Height="300" Width="500"
         WindowStyle="ThreeDBorderWindow"
-        ResizeMode="NoResize"
-        KeyDown="MainWindow_OnKeyDown">
+        ResizeMode="NoResize">
+
     <Window.Resources>
         <Style x:Key="BtnStyle">
             <Setter Property="Button.BorderBrush" Value="Indigo"/>
@@ -31,8 +31,8 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <Button Margin="5" Content="Kill ctrl alt del" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="DelCtrlAltDel_OnClick"/>
-                <Button Margin="5" Content="Enable ctrl alt del" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="EnableCtrlAltDel_OnClick"/>
+                <Button Margin="5" Content="Kill Task Manager" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="DelTaskMngr_OnClick"/>
+                <Button Margin="5" Content="Enable Task Manager" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="EnableTaskMngr_OnClick"/>
             </Grid>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -42,7 +42,15 @@
                 <Button Margin="5" Content="Kill Start Menu" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="DelStartMenu_OnClick"/>
                 <Button Margin="5" Content="Enable Start Menu" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="EnableStartMenu_OnClick"/>
             </Grid>
-            <Button Content="hooks.SomeMethod();" Style="{StaticResource BtnStyle}" Margin="10,0" Click="SomeMethod_OnClick"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Button Margin="5" Content="Kill Win Keys" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="DisableWinKeys_OnClick"/>
+                <Button Margin="5" Content="Enable Win Keys" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="EnableWinKeys_OnClick"/>
+            </Grid>
+            <Button Margin="5" Content="Enable Closig" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="SwitchOnClose_OnClick"/>
         </StackPanel>
     </Grid>
 </Window>
