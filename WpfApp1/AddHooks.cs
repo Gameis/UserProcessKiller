@@ -146,8 +146,8 @@ namespace WpfApp1
 		public void SetAutoRunValue()
 		{
 			RegistryKey regKey = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run\\");
-			regKey?.SetValue("MyApp", Assembly.GetExecutingAssembly().Location);
-			regKey?.Close();
+			regKey.SetValue("MyApp", Assembly.GetExecutingAssembly().Location);
+			regKey.Close();
 		}
     }
 }

@@ -119,7 +119,12 @@ namespace WpfApp1
 		}
 
 		private void SetAutorun_OnClick(object sender, RoutedEventArgs e) {
-			hooks.SetAutoRunValue();
+			try {
+				hooks.SetAutoRunValue();
+            }
+			catch (Exception ex) {
+				MessageBox.Show(ex.ToString());
+			}
 		}
 	}
 }
