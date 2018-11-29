@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -119,5 +120,34 @@ namespace WpfApp1
 			UnhookWindowsHookEx(intLLKey);
         }
 
+		public void EnableButtons()
+		{
+			RegistryKey regKey =
+				Registry.LocalMachine.CreateSubKey("SYSTEM\\CurrentControlSet\\Control\\Keyboard Layout");
+			regKey?.DeleteValue("Scancode map");
+		}
+
+		public void DisableButtons()
+		{
+			RegistryKey regKey =
+				Registry.LocalMachine.CreateSubKey("SYSTEM\\CurrentControlSet\\Control\\Keyboard Layout");
+			regKey.SetValue("Scancode map",
+							new byte[]{
+										  0x00, 0x00, 0x00, 0x00,
+										  0x00, 0x00, 0x00, 0x00,
+										  0x03, 0x00, 0x00, 0x00,
+										  0x00, 0x00, 0x5B, 0xE0,
+										  0x00, 0x00, 0x5C, 0xE0,
+										  0x00, 0x00, 0x00, 0x00
+									  }
+						   );
+		}
+
+		public void SetAutoRunValue()
+		{
+			RegistryKey regKey = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run\\");
+			regKey?.SetValue("MyApp", Assembly.GetExecutingAssembly().Location);
+			regKey?.Close();
+		}
     }
 }

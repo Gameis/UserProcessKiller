@@ -21,6 +21,7 @@ namespace WpfApp1
 		}
 
         public MainWindow() {
+			rebootController.SetPriv();
             _timer = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.Normal, delegate
 		    {
 				TimeDisplay1.Text = DateTime.Now.ToString("HH:mm:ss") +
@@ -31,38 +32,6 @@ namespace WpfApp1
             InitializeComponent();
 		}
 
-		private void DisableButtons() {
-			try {
-				RegistryKey regKey =
-					Registry.LocalMachine.CreateSubKey("SYSTEM\\CurrentControlSet\\Control\\Keyboard Layout");
-				regKey.SetValue("Scancode map", 
-								new byte[]{
-									  0x00, 0x00, 0x00, 0x00,
-									  0x00, 0x00, 0x00, 0x00,
-									  0x03, 0x00, 0x00, 0x00,
-									  0x00, 0x00, 0x5B, 0xE0,
-									  0x00, 0x00, 0x5C, 0xE0,
-									  0x00, 0x00, 0x00, 0x00
-								}
-				);
-			}
-			catch (Exception e) {
-				MessageBox.Show(e.ToString());
-			}
-		}
-
-		private void EnableButtons() {
-			try
-			{
-				RegistryKey regKey =
-					Registry.LocalMachine.CreateSubKey("SYSTEM\\CurrentControlSet\\Control\\Keyboard Layout");
-				regKey?.DeleteValue("Scancode map");
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(ex.ToString());
-			}
-        }
 
         private void OnClosingWindow(object sender, CancelEventArgs e) {
 			if (_canClose) {
@@ -103,18 +72,23 @@ namespace WpfApp1
 			}
         }
 
-		private void SetAutoRunValue() {
-			RegistryKey regKey = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run\\");
-			regKey?.SetValue("MyApp", Assembly.GetExecutingAssembly().Location);
-			regKey?.Close();
-        }
-
 		private void DisableWinKeys_OnClick(object sender, RoutedEventArgs e) {
-			DisableButtons();
+			try {
+				hooks.DisableButtons();
+			}
+			catch (Exception ex) {
+				MessageBox.Show(ex.ToString());
+			}
+			
 		}
 
 		private void EnableWinKeys_OnClick(object sender, RoutedEventArgs e) {
-			EnableButtons();
+			try {
+				hooks.EnableButtons();
+            }
+			catch (Exception ex) {
+				MessageBox.Show(ex.ToString());
+			}
 		}
 
 		private void SwitchOnClose_OnClick(object sender, RoutedEventArgs e) {
@@ -145,7 +119,7 @@ namespace WpfApp1
 		}
 
 		private void SetAutorun_OnClick(object sender, RoutedEventArgs e) {
-			SetAutoRunValue();
+			hooks.SetAutoRunValue();
 		}
 	}
 }
