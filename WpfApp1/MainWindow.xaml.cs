@@ -21,7 +21,6 @@ namespace WpfApp1
 		}
 
         public MainWindow() {
-			rebootController.SetPriv();
             _timer = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.Normal, delegate
 		    {
 				TimeDisplay1.Text = DateTime.Now.ToString("HH:mm:ss") +
@@ -34,14 +33,7 @@ namespace WpfApp1
 
 
         private void OnClosingWindow(object sender, CancelEventArgs e) {
-			if (_canClose) {
-				hooks.ShowStartMenu();
-				hooks.EnableCTRLALTDEL();
-				e.Cancel = false;
-			}
-			else {
-				e.Cancel = true;
-			}
+			e.Cancel = !_canClose;
 		}
 
 		private void DelTaskMngr_OnClick(object sender, RoutedEventArgs e) {

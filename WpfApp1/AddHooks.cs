@@ -149,5 +149,13 @@ namespace WpfApp1
 			regKey.SetValue("MyApp", Assembly.GetExecutingAssembly().Location);
 			regKey.Close();
 		}
+
+		public void BlockScreen(ref MainWindow window) {
+			window.Topmost = true;
+		}
+
+		public void UnBlocScreen(ref MainWindow window) {
+			window.Topmost = false;
+		}
     }
 }

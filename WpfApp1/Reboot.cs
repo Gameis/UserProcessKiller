@@ -42,7 +42,7 @@ namespace WpfApp1
         internal const int TOKEN_ADJUST_PRIVILEGES = 0x00000020;
         internal const string SE_SHUTDOWN_NAME = "SeShutdownPrivilege";
         //функция SetPriv для повышения привилегий процесса
-        public void SetPriv()
+        private void SetPriv()
         {
             TokPriv1Luid tkp; //экземпляр структуры TokPriv1Luid 
             IntPtr htok = IntPtr.Zero;
