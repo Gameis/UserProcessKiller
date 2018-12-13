@@ -4,18 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Title" Height="300" Width="500"
+        Title="Title" Height="364" Width="500"
         WindowStyle="ThreeDBorderWindow"
         ResizeMode="NoResize">
 
     <Window.Resources>
         <Style x:Key="BtnStyle">
-            <Setter Property="Button.BorderBrush" Value="Indigo"/>
-            <Setter Property="Button.Background" Value="DarkKhaki"/>
+            <Setter Property="Button.BorderBrush" Value="MediumSeaGreen"/>
+            <Setter Property="Button.Background" Value="PaleGreen"/>
             <Setter Property="Button.BorderThickness" Value="5"/>
         </Style>
     </Window.Resources>
-    <Grid x:Name="LayoutRoot" Background="White">
+    <Grid x:Name="LayoutRoot" Background="Green">
         <Grid.RowDefinitions>
             <RowDefinition Height="37*"/>
             <RowDefinition Height="182*"/>
@@ -24,8 +24,8 @@
             <ColumnDefinition Width="199*"/>
             <ColumnDefinition Width="48*"/>
         </Grid.ColumnDefinitions>
-        <TextBlock Grid.Row="0" Grid.Column="1" Name="TimeDisplay" TextAlignment="Center" ToolTip=""/>
-        <Button Margin="5" Content="Add to Autorun" Grid.Row="0" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="SetAutorun_OnClick"/>
+        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TimeDisplay" TextAlignment="Center" ToolTip="Time" Background="PaleGreen"/>
+        <Button Margin="14" Content="Add to Autorun" Grid.Row="0" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="SetAutorun_OnClick"/>
 
         <StackPanel Grid.Row="1" Grid.Column="0">
             <Grid>
@@ -40,15 +40,12 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                <Button Margin="5" Content="Kill Task Manager" Grid.Row="0" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="DelTaskMngr_OnClick"/>
-                <Button Margin="5" Content="Enable Task Manager" Grid.Row="0" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="EnableTaskMngr_OnClick"/>
-                
                 <Button Margin="5" Content="Kill Start Menu" Grid.Row="1" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="DelStartMenu_OnClick"/>
                 <Button Margin="5" Content="Enable Start Menu" Grid.Row="1" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="EnableStartMenu_OnClick"/>
-                
-                <Button Margin="5" Content="Kill Win Keys" Grid.Row="2" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="DisableWinKeys_OnClick"/>
-                <Button Margin="5" Content="Enable Win Keys" Grid.Row="2" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="EnableWinKeys_OnClick"/>
-                
+
+                <Button Margin="5" Content="Hook" Grid.Row="1" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="Hook_OnClick"/>
+                <Button Margin="5" Content="Unhook" Grid.Row="1" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="Unhook_OnClick"/>
+
                 <Button Margin="5" Content="Soft reboot" Grid.Row="3" Grid.Column="0" Style="{StaticResource BtnStyle}" Click="SoftReboot_OnClick"/>
                 <Button Margin="5" Content="Hard reboot" Grid.Row="3" Grid.Column="1" Style="{StaticResource BtnStyle}" Click="HardReboot_OnClick"/>
 

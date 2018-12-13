@@ -14,33 +14,33 @@ namespace WpfApp1
         static extern int InitiateSystemShutdown(string lpMachineName, string lpMessage, int dwTimeout, bool bForceAppsClosed, bool bRebootAfterShutdown);
         //импортируем API функцию AdjustTokenPrivileges
         [DllImport("advapi32.dll", ExactSpelling = true, SetLastError = true)]
-        internal static extern bool AdjustTokenPrivileges(IntPtr htok, bool disall,
+		private static extern bool AdjustTokenPrivileges(IntPtr htok, bool disall,
         ref TokPriv1Luid newst, int len, IntPtr prev, IntPtr relen);
         //импортируем API функцию GetCurrentProcess
         [DllImport("kernel32.dll", ExactSpelling = true)]
-        internal static extern IntPtr GetCurrentProcess();
+		private static extern IntPtr GetCurrentProcess();
         //импортируем API функцию OpenProcessToken
         [DllImport("advapi32.dll", ExactSpelling = true, SetLastError = true)]
-        internal static extern bool OpenProcessToken(IntPtr h, int acc, ref IntPtr phtok);
+		private static extern bool OpenProcessToken(IntPtr h, int acc, ref IntPtr phtok);
         //импортируем API функцию LookupPrivilegeValue
         [DllImport("advapi32.dll", SetLastError = true)]
-        internal static extern bool LookupPrivilegeValue(string host, string name, ref long pluid);
+		private static extern bool LookupPrivilegeValue(string host, string name, ref long pluid);
         //импортируем API функцию LockWorkStation
         [DllImport("user32.dll", EntryPoint = "LockWorkStation")]
         static extern bool LockWorkStation();
         //объявляем структуру TokPriv1Luid для работы с привилегиями
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        internal struct TokPriv1Luid
+		private struct TokPriv1Luid
         {
             public int Count;
             public long Luid;
             public int Attr;
         }
         //объявляем необходимые, для API функций, константые значения, согласно MSDN
-        internal const int SE_PRIVILEGE_ENABLED = 0x00000002;
-        internal const int TOKEN_QUERY = 0x00000008;
-        internal const int TOKEN_ADJUST_PRIVILEGES = 0x00000020;
-        internal const string SE_SHUTDOWN_NAME = "SeShutdownPrivilege";
+		private const int SE_PRIVILEGE_ENABLED = 0x00000002;
+		private const int TOKEN_QUERY = 0x00000008;
+		private const int TOKEN_ADJUST_PRIVILEGES = 0x00000020;
+        private const string SE_SHUTDOWN_NAME = "SeShutdownPrivilege";
         //функция SetPriv для повышения привилегий процесса
         private void SetPriv()
         {
@@ -67,16 +67,8 @@ namespace WpfApp1
 		//halt(false, true)  //жесткое выключение
         public int Halt(bool rebootMode, bool forced)
         {
-            SetPriv(); //получаем привилегия
-            //вызываем функцию InitiateSystemShutdown, передавая ей необходимые параметры
+            SetPriv(); 
             return InitiateSystemShutdown(null, null, 0, forced, rebootMode);
-        }
-        //публичный метод для блокировки операционной системы
-        public int Lock()
-        {
-            if (LockWorkStation())
-                return 1;
-            return 0;
         }
     }
 }
