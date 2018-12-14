@@ -59,6 +59,7 @@ namespace WpfApp1
                 AdjustTokenPrivileges(htok, false, ref tkp, 0, IntPtr.Zero, IntPtr.Zero);
             }
         }
+		
 
         //публичный метод для перезагрузки/выключения машины
 		//halt(true, false)  //мягкая перезагрузка
