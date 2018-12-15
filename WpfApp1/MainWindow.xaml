@@ -54,6 +54,15 @@
 
             </Grid>
             <Button Margin="5" Content="Enable Closig" Style="{StaticResource BtnStyle}" Click="SwitchOnClose_OnClick"/>
+            <Button Margin="5" Content="Disale Task Manager" Style="{StaticResource BtnStyle}" Click="SwitchTaskMgr_OnClick"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="1">
+            <Button Margin="5" Content="login" Style="{StaticResource BtnStyle}" Click="SendLoginReq_OnClick"/>
+            <Button Margin="5" Content="pcs" Style="{StaticResource BtnStyle}" Click="GetPCsReq_OnClick"/>
+            <Button Margin="5" Content="show pcs" Style="{StaticResource BtnStyle}" Click="ShowPCs_OnClick"/>
+            <Button Margin="5" Content="add pc" Style="{StaticResource BtnStyle}" Click="AddPC_OnClick"/>
+            <Button Margin="5" Content="rand con" Style="{StaticResource BtnStyle}" Click="RandConnect_OnClick"/>
+            <Button Margin="5" Content="update" Style="{StaticResource BtnStyle}" Click="Update_OnClick"/>
         </StackPanel>
     </Grid>
 </Window>

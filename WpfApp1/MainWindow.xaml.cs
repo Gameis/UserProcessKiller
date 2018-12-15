@@ -12,10 +12,19 @@ namespace WpfApp1
 {
     public partial class MainWindow : Window {
 		private SysControl _hooks = new SysControl();
+
+		private ServerController _serverController = new ServerController();
 		
 		private DispatcherTimer _timer;
 		private bool _canClose = false;
-		
+
+		private string token;
+		private PCInfoType[] pcs;
+		private string pcToken;
+
+		private bool isUse;
+		private long end;
+
 		public TextBlock TimeDisplay1 {
 			get => TimeDisplay;
 			set => TimeDisplay = value;
@@ -30,13 +39,39 @@ namespace WpfApp1
 									DateTime.Now.ToString("MM/dd/yyyy");
 				TimeDisplay1.ToolTip = TimeDisplay1.Text;
 			}, Dispatcher);
+
+			_serverController.Logged += OnLogin;
+			_serverController.PCsInfoReceived += OnPCReceived;
+			_serverController.PCConnected += OnConnected;
+			_serverController.Updated += OnUpdate;
+
 			Closing += OnClosingWindow;
 			_hooks.SetLowLevelProcToLib();
             _hooks.AllowAccessibilityShortcutKeys(false);
 			_hooks.Hooked = false;
 		}
 
-        private void OnClosingWindow(object sender, CancelEventArgs e) {
+		private void OnUpdate(object sender, UpdateEventArgs e) {
+			isUse = e.isUse;
+			end = e.end;
+		}
+
+		private void OnConnected(object sender, ConnectedEventArgs e) {
+			pcToken = e.token;
+		}
+
+		private void OnPCReceived(object sender, PCsInfoEventArgs e) {
+			pcs = e.PCsCotainer.pc;
+		}
+
+		private void OnLogin(object sender, LoginEventArgs e) {
+			token = e.token;
+		}
+
+		
+
+
+		private void OnClosingWindow(object sender, CancelEventArgs e) {
 			e.Cancel = !_canClose;
 			if (_canClose) {
 				_hooks.AllowAccessibilityShortcutKeys(true);
@@ -107,5 +142,60 @@ namespace WpfApp1
 		private void Unhook_OnClick(object sender, RoutedEventArgs e) {
 			_hooks.Hooked = false;
         }
+
+		private void SwitchTaskMgr_OnClick(object sender, RoutedEventArgs e) {
+			try {
+				if (((Button)sender).Content.ToString() == "Disale Task Manager")
+				{
+					_hooks.KillTaskMngr();
+					((Button) sender).Content = "Enable Task manager";
+				}
+				else {
+					_hooks.EnableTaskMngr();
+					((Button) sender).Content = "Disale Task Manager";
+
+				}
+            }
+			catch (Exception ex) {
+				MessageBox.Show(ex.ToString());
+			}
+		}
+
+
+		private async void SendLoginReq_OnClick(object sender, RoutedEventArgs e) {
+			await _serverController.LoginPost("log", "pass");
+			Console.WriteLine($"token: {token}");
+		}
+
+		private async void GetPCsReq_OnClick(object sender, RoutedEventArgs e) {
+            await _serverController.GetPCPost(token);
+		}
+
+		private void ShowPCs_OnClick(object sender, RoutedEventArgs e) {
+			string temp = "";
+			foreach (var pc in pcs) {
+				temp += $"name: {pc.name} | id: {pc.id} | type: {pc.type}" + Environment.NewLine;
+			}
+
+			MessageBox.Show(temp);
+		}
+
+		private async void AddPC_OnClick(object sender, RoutedEventArgs e) {
+			AddPC adder = new AddPC();
+			adder.ShowDialog();
+			await _serverController.AddPCPosc(token, adder.nameVal, adder.typeVal);
+		}
+
+		private async void RandConnect_OnClick(object sender, RoutedEventArgs e) {
+			Random rnd = new Random();
+
+			int randomIndex = rnd.Next(0, pcs.Length - 1);
+
+			await _serverController.ConnectPost(token,pcs[randomIndex].id);
+		}
+
+		private async void Update_OnClick(object sender, RoutedEventArgs e) {
+			await _serverController.Update(pcToken);
+		}
 	}
 }

@@ -118,8 +118,8 @@ namespace WpfApp1
                 case 260:
                 case 261:
                     //Alt+Tab, Alt+Esc, Ctrl+Esc, Windows Key, ...
-					blnEat = ((lParam.vkCode == 9) && (lParam.flags == 32))  ||
-							 ((lParam.vkCode == 27) && (lParam.flags == 32)) ||
+					blnEat = ((lParam.vkCode == 9) && (lParam.flags == 32)) ||
+							 ((lParam.vkCode == 27) && (lParam.flags == 32))||
 							 ((lParam.vkCode == 27) && (lParam.flags == 0)) ||
 							 ((lParam.vkCode == 91) && (lParam.flags == 1)) ||
 							 ((lParam.vkCode == 92) && (lParam.flags == 1)) ||
