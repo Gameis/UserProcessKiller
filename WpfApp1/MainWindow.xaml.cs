@@ -70,8 +70,6 @@ namespace WpfApp1
 			token = e.token;
 		}
 
-		
-
 
 		private void OnClosingWindow(object sender, CancelEventArgs e) {
 			e.Cancel = !_canClose;
@@ -189,15 +187,13 @@ namespace WpfApp1
 		}
 
 		private async void RandConnect_OnClick(object sender, RoutedEventArgs e) {
-			Random rnd = new Random();
-
-			int randomIndex = rnd.Next(0, pcs.Length - 1);
-
-			await _serverController.ConnectPost(token,pcs[randomIndex].id);
+			await _serverController.ConnectPost(token,pcs[1].id);
 		}
 
-		private async void Update_OnClick(object sender, RoutedEventArgs e) {
-			await _serverController.Update(pcToken);
+		private  void Update_OnClick(object sender, RoutedEventArgs e) {
+			_serverController.SetPCToken(pcToken);
+			_serverController.SetUpdateTimeOut(10000);
+			_serverController.UpdateStart();
 		}
 	}
 }

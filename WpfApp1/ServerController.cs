@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 namespace WpfApp1
@@ -15,6 +16,7 @@ namespace WpfApp1
 		public delegate void GetPCsInfo(object sender, PCsInfoEventArgs e);
 		public delegate void ConnectPCSuccess(object sender, ConnectedEventArgs e);
 		public delegate void UpdateEvent(object sender, UpdateEventArgs e);
+		public delegate void InvalidRequestData(object sender, InvalidRequestEventArgs e);
 
 		/// <summary>
         /// Событие, возникающее при ответе на запрос авторизации
@@ -32,6 +34,67 @@ namespace WpfApp1
         /// Событие, возникающее при ответе на запрос обновления состояния
         /// </summary>
 		public event UpdateEvent Updated;
+		/// <summary>
+        /// Событие, возникающее при ошибке во время запроса на сервер
+        /// </summary>
+		public event InvalidRequestData ErrorOccurred;
+
+
+        private TimerCallback _tmCallback;
+		private Timer _timer;
+		private long _updateTimeOut;
+		private string _pcToken;
+
+		public void SetPCToken(string pcToken) {
+			_pcToken = pcToken;
+		}
+
+		public void SetUpdateTimeOut(long time) {
+			_updateTimeOut = time;
+		}
+
+		public void UpdateStart() {
+			_tmCallback = new TimerCallback(AutoUpdate);
+			_timer = new Timer(_tmCallback, _pcToken,0,_updateTimeOut);
+		}
+
+		public async void AutoUpdate(object pcToken) {
+			try {
+				var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/update");
+				request.Method = "POST";
+
+				string rawData = $"{{\"token\":\"{(string)pcToken}\"}}";
+				Console.WriteLine(rawData);
+
+				byte[] data = Encoding.UTF8.GetBytes(rawData);
+				request.ContentType = "application/json";
+				request.ContentLength = data.Length;
+
+				using (Stream dataStream = request.GetRequestStream())
+				{
+					dataStream.Write(data, 0, data.Length);
+				}
+
+				WebResponse response = await request.GetResponseAsync();
+
+				UpdateRespType resp;
+				using (Stream stream = response.GetResponseStream())
+				{
+					using (StreamReader reader = new StreamReader(stream))
+					{
+						string responseData = reader.ReadToEnd();
+						Console.WriteLine(responseData);
+						resp = JsonConvert.DeserializeObject<UpdateRespType>(responseData);
+					}
+				}
+				Updated?.Invoke(this, new UpdateEventArgs(resp));
+			}
+			catch (Exception ex) {
+				ErrorOccurred?.Invoke(this,
+									  new InvalidRequestEventArgs(ex, typeof(ServerController).GetMethod("LoginPost")?.Name));
+            }
+
+        }
 
         /// <summary>
         /// Запрос на авторизацию администратора
@@ -40,36 +103,42 @@ namespace WpfApp1
         /// <param name="password"> Пароль для авторизации на сервере (тестовый = pass)</param>
         /// <returns> Вызывает событие Logged, в которое передает Токен полученный с сервера</returns>
         public async Task LoginPost(string email, string password) {
-			var request = WebRequest.Create(serverUrl + "/api/v0.0/login");
-			request.Method = "POST";
+			try {
+				var request = WebRequest.Create(serverUrl + "/api/v0.0/login");
+				request.Method = "POST";
 
-			var loginParam = new LoginPostType(email, password);
+				var loginParam = new LoginPostType(email, password);
 		
 
-			string rawData = JsonConvert.SerializeObject(loginParam);
-			Console.WriteLine(rawData);
+				string rawData = JsonConvert.SerializeObject(loginParam);
+				Console.WriteLine(rawData);
 
-            byte[] data = Encoding.UTF8.GetBytes(rawData);
-			request.ContentType = "application/json";
-			request.ContentLength = data.Length;
+				byte[] data = Encoding.UTF8.GetBytes(rawData);
+				request.ContentType = "application/json";
+				request.ContentLength = data.Length;
 
-			using (Stream dataStream = request.GetRequestStream()) {
-				dataStream.Write(data, 0, data.Length);
+				using (Stream dataStream = request.GetRequestStream()) {
+					dataStream.Write(data, 0, data.Length);
+				}
+			
+				WebResponse response = await request.GetResponseAsync();
+				string token;
+				using (Stream stream = response.GetResponseStream()) {
+					using (StreamReader reader = new StreamReader(stream)) {
+						string responseData = reader.ReadToEnd();
+						token = JsonConvert.DeserializeObject<LoginRespType>(responseData).token;
+					
+					}
+				}
+				response.Close();
+			
+				Logged?.Invoke(this, new LoginEventArgs(token));
+			}
+			catch (Exception ex) {
+				ErrorOccurred?.Invoke(this,
+									  new InvalidRequestEventArgs(ex, typeof(ServerController).GetMethod("LoginPost")?.Name));
             }
 
-			WebResponse response = await request.GetResponseAsync();
-			string token;
-			using (Stream stream = response.GetResponseStream()) {
-				using (StreamReader reader = new StreamReader(stream)) {
-					string responseData = reader.ReadToEnd();
-					token = JsonConvert.DeserializeObject<LoginRespType>(responseData).token;
-					
-				}
-			}
-			response.Close();
-			
-			Logged?.Invoke(this, new LoginEventArgs(token));
-			
         }
 
         /// <summary>
@@ -78,55 +147,67 @@ namespace WpfApp1
         /// <param name="token"> Токен администратора </param>
         /// <returns> Вызывает событие PCsInfoReceived, в котором передает список ПК</returns>
         public async Task GetPCPost(string token) {
-			var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/get");
-			request.Method = "POST";
+			try {
+				var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/get");
+				request.Method = "POST";
 
-			string rawData = "{\"token\":\"" + token + "\"}";
-			Console.WriteLine(rawData);
+				string rawData = "{\"token\":\"" + token + "\"}";
+				Console.WriteLine(rawData);
 
-			byte[] data = Encoding.UTF8.GetBytes(rawData);
-			request.ContentType = "application/json";
-			request.ContentLength = data.Length;
+				byte[] data = Encoding.UTF8.GetBytes(rawData);
+				request.ContentType = "application/json";
+				request.ContentLength = data.Length;
 
-			using (Stream dataStream = request.GetRequestStream()) {
-				dataStream.Write(data, 0, data.Length);
-			}
+				using (Stream dataStream = request.GetRequestStream()) {
+					dataStream.Write(data, 0, data.Length);
+				}
 
-			WebResponse response = await request.GetResponseAsync();
-			PCSRespType responsePCS;
-			using (Stream stream = response.GetResponseStream())
-			{
-				using (StreamReader reader = new StreamReader(stream))
+				WebResponse response = await request.GetResponseAsync();
+				PCSRespType responsePCS;
+				using (Stream stream = response.GetResponseStream())
 				{
-					string responseData = reader.ReadToEnd();
-					Console.WriteLine(responseData);
-					responsePCS = JsonConvert.DeserializeObject<PCSRespType>(responseData);
+					using (StreamReader reader = new StreamReader(stream))
+					{
+						string responseData = reader.ReadToEnd();
+						Console.WriteLine(responseData);
+						responsePCS = JsonConvert.DeserializeObject<PCSRespType>(responseData);
+					}
+				}
+				response.Close();
+				if (responsePCS != null) {
+					PCsInfoReceived?.Invoke(this, new PCsInfoEventArgs(responsePCS));
 				}
 			}
-			response.Close();
-			if (responsePCS != null) {
-				PCsInfoReceived?.Invoke(this, new PCsInfoEventArgs(responsePCS));
-			}
+			catch (Exception ex) {
+				ErrorOccurred?.Invoke(this,
+									  new InvalidRequestEventArgs(ex, typeof(ServerController).GetMethod("GetPCPost")?.Name));
+            }
         }
 
 		public async Task AddPCPost(string token, string name, int type) {
-			var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/add");
-			request.Method = "POST";
+			try {
+				var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/add");
+				request.Method = "POST";
 
-			string rawData = JsonConvert.SerializeObject(new AddPCPostType(token, name, type));
-			Console.WriteLine(rawData);
+				string rawData = JsonConvert.SerializeObject(new AddPCPostType(token, name, type));
+				Console.WriteLine(rawData);
 
-			byte[] data = Encoding.UTF8.GetBytes(rawData);
-			request.ContentType = "application/json";
-			request.ContentLength = data.Length;
+				byte[] data = Encoding.UTF8.GetBytes(rawData);
+				request.ContentType = "application/json";
+				request.ContentLength = data.Length;
 
-			using (Stream dataStream = request.GetRequestStream())
-			{
-				dataStream.Write(data, 0, data.Length);
+				using (Stream dataStream = request.GetRequestStream())
+				{
+					dataStream.Write(data, 0, data.Length);
+				}
+
+				WebResponse response = await request.GetResponseAsync();
+				response.Close();
 			}
-
-			WebResponse response = await request.GetResponseAsync();
-			response.Close();
+			catch (Exception ex) {
+				ErrorOccurred?.Invoke(this,
+									  new InvalidRequestEventArgs(ex, typeof(ServerController).GetMethod("AddPCPost")?.Name));
+            }
         }
 
         /// <summary>
@@ -136,35 +217,41 @@ namespace WpfApp1
         /// <param name="id"> Id компьютера, который необходимо подключить</param>
         /// <returns> Вызывает событие PCConnected, в котором возвращается токен компьютера </returns>
         public async Task ConnectPost(string token, long id) {
-			var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/connect");
-			request.Method = "POST";
+			try {
+				var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/connect");
+				request.Method = "POST";
 
-			string rawData = JsonConvert.SerializeObject(new ConnectPostType(token, id));
-			Console.WriteLine(rawData);
+				string rawData = JsonConvert.SerializeObject(new ConnectPostType(token, id));
+				Console.WriteLine(rawData);
 
-			byte[] data = Encoding.UTF8.GetBytes(rawData);
-			request.ContentType = "application/json";
-			request.ContentLength = data.Length;
+				byte[] data = Encoding.UTF8.GetBytes(rawData);
+				request.ContentType = "application/json";
+				request.ContentLength = data.Length;
 
-			using (Stream dataStream = request.GetRequestStream())
-			{
-				dataStream.Write(data, 0, data.Length);
-			}
-
-            WebResponse response = await request.GetResponseAsync();
-			string pcToken;
-			using (Stream stream = response.GetResponseStream())
-			{
-				using (StreamReader reader = new StreamReader(stream))
+				using (Stream dataStream = request.GetRequestStream())
 				{
-					string responseData = reader.ReadToEnd();
-					Console.WriteLine(responseData);
-					pcToken = JsonConvert.DeserializeObject<ConnectRespType>(responseData).token;
+					dataStream.Write(data, 0, data.Length);
 				}
-			}
-			response.Close();
 
-			PCConnected?.Invoke(this, new ConnectedEventArgs(pcToken));
+				WebResponse response = await request.GetResponseAsync();
+				string pcToken;
+				using (Stream stream = response.GetResponseStream())
+				{
+					using (StreamReader reader = new StreamReader(stream))
+					{
+						string responseData = reader.ReadToEnd();
+						Console.WriteLine(responseData);
+						pcToken = JsonConvert.DeserializeObject<ConnectRespType>(responseData).token;
+					}
+				}
+				response.Close();
+
+				PCConnected?.Invoke(this, new ConnectedEventArgs(pcToken));
+			}
+			catch (Exception ex) {
+				ErrorOccurred?.Invoke(this,
+									  new InvalidRequestEventArgs(ex, typeof(ServerController).GetMethod("ConnectPost")?.Name));
+            }
         }
 
         /// <summary>
@@ -173,34 +260,40 @@ namespace WpfApp1
         /// <param name="pcToken"> Токен компьютера </param>
         /// <returns> Вызывает событие Updated, в котором возвращаются новые значения состояния</returns>
         public async Task Update(string pcToken) {
-			var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/update");
-			request.Method = "POST";
+			try {
+				var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/update");
+				request.Method = "POST";
 
-			string rawData = $"{{\"token\":\"{pcToken}\"}}";
-			Console.WriteLine(rawData);
+				string rawData = $"{{\"token\":\"{pcToken}\"}}";
+				Console.WriteLine(rawData);
 
-			byte[] data = Encoding.UTF8.GetBytes(rawData);
-			request.ContentType = "application/json";
-			request.ContentLength = data.Length;
+				byte[] data = Encoding.UTF8.GetBytes(rawData);
+				request.ContentType = "application/json";
+				request.ContentLength = data.Length;
 
-			using (Stream dataStream = request.GetRequestStream())
-			{
-				dataStream.Write(data, 0, data.Length);
-			}
-
-			WebResponse response = await request.GetResponseAsync();
-			
-			UpdateRespType resp;
-			using (Stream stream = response.GetResponseStream())
-			{
-				using (StreamReader reader = new StreamReader(stream))
+				using (Stream dataStream = request.GetRequestStream())
 				{
-					string responseData = reader.ReadToEnd();
-					Console.WriteLine(responseData);
-					resp = JsonConvert.DeserializeObject<UpdateRespType>(responseData);
+					dataStream.Write(data, 0, data.Length);
 				}
+
+				WebResponse response = await request.GetResponseAsync();
+
+				UpdateRespType resp;
+				using (Stream stream = response.GetResponseStream())
+				{
+					using (StreamReader reader = new StreamReader(stream))
+					{
+						string responseData = reader.ReadToEnd();
+						Console.WriteLine(responseData);
+						resp = JsonConvert.DeserializeObject<UpdateRespType>(responseData);
+					}
+				}
+				Updated?.Invoke(this, new UpdateEventArgs(resp));
+            }
+			catch (Exception ex) {
+				ErrorOccurred?.Invoke(this, 
+									  new InvalidRequestEventArgs(ex, typeof(ServerController).GetMethod("Update")?.Name));
 			}
-			Updated?.Invoke(this, new UpdateEventArgs(resp));
         }
 	}
 

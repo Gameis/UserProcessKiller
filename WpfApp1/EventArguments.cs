@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,4 +43,24 @@ namespace WpfApp1
 		public bool isUse;
 		public long end;
     }
+
+	public class InvalidRequestEventArgs {
+		private string      _toStringResult;
+		public  string      Message;
+		public  string      Source;
+		public  IDictionary Data;
+		public  string      MethodName;
+
+        public InvalidRequestEventArgs(Exception info, string methodName) {
+			Data = info.Data;
+			Message = info.Message;
+			_toStringResult = info.ToString();
+			Source = info.Source;
+			
+		}
+
+		public override string ToString() {
+			return _toStringResult;
+		}
+	}
 }

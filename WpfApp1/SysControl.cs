@@ -170,8 +170,9 @@ namespace WpfApp1
         public void EnableTaskMngr()
         {
 		    string subKey = @"Software\Microsoft\Windows\CurrentVersion\Policies\System";
-		    RegistryKey rk = Registry.CurrentUser;
-		    rk.DeleteSubKeyTree(subKey);
+		    RegistryKey rk = Registry.CurrentUser.OpenSubKey(subKey);
+			rk.DeleteValue("DisableTaskMgr");
+		    
         }
 
 		public void OnClose() {
@@ -181,8 +182,8 @@ namespace WpfApp1
 		public void SetAutoRunValue()
 		{
 			RegistryKey regKey = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run\\");
-			regKey.SetValue("MyApp", Assembly.GetExecutingAssembly().Location);
-			regKey.Close();
+			regKey?.SetValue("MyApp", Assembly.GetExecutingAssembly().Location);
+			regKey?.Close();
 		}
 
 		public void BlockScreen(ref Window window) {
