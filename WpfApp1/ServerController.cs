@@ -16,12 +16,30 @@ namespace WpfApp1
 		public delegate void ConnectPCSuccess(object sender, ConnectedEventArgs e);
 		public delegate void UpdateEvent(object sender, UpdateEventArgs e);
 
+		/// <summary>
+        /// Событие, возникающее при ответе на запрос авторизации
+        /// </summary>
 		public event LoginSuccess Logged;
+		/// <summary>
+        /// Событие, возникающее при ответе на запрос получения списка пк
+        /// </summary>
 		public event GetPCsInfo PCsInfoReceived;
+		/// <summary>
+        /// Событие, возникающее при ответе на запрос подключения пк
+        /// </summary>
 		public event ConnectPCSuccess PCConnected;
+		/// <summary>
+        /// Событие, возникающее при ответе на запрос обновления состояния
+        /// </summary>
 		public event UpdateEvent Updated;
 
-		public async Task LoginPost(string email, string password) {
+        /// <summary>
+        /// Запрос на авторизацию администратора
+        /// </summary>
+        /// <param name="email"> Логин для авторизации на сервере (тестовый = log)</param>
+        /// <param name="password"> Пароль для авторизации на сервере (тестовый = pass)</param>
+        /// <returns> Вызывает событие Logged, в которое передает Токен полученный с сервера</returns>
+        public async Task LoginPost(string email, string password) {
 			var request = WebRequest.Create(serverUrl + "/api/v0.0/login");
 			request.Method = "POST";
 
@@ -54,7 +72,12 @@ namespace WpfApp1
 			
         }
 
-		public async Task GetPCPost(string token) {
+        /// <summary>
+        /// Запрос на получение списка ПК
+        /// </summary>
+        /// <param name="token"> Токен администратора </param>
+        /// <returns> Вызывает событие PCsInfoReceived, в котором передает список ПК</returns>
+        public async Task GetPCPost(string token) {
 			var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/get");
 			request.Method = "POST";
 
@@ -106,7 +129,13 @@ namespace WpfApp1
 			response.Close();
         }
 
-		public async Task ConnectPost(string token, long id) {
+        /// <summary>
+        /// Запрос на подключение ПК
+        /// </summary>
+        /// <param name="token"> Токен администратора</param>
+        /// <param name="id"> Id компьютера, который необходимо подключить</param>
+        /// <returns> Вызывает событие PCConnected, в котором возвращается токен компьютера </returns>
+        public async Task ConnectPost(string token, long id) {
 			var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/connect");
 			request.Method = "POST";
 
@@ -138,7 +167,12 @@ namespace WpfApp1
 			PCConnected?.Invoke(this, new ConnectedEventArgs(pcToken));
         }
 
-		public async Task Update(string pcToken) {
+        /// <summary>
+        /// Обновление параметорв состояния ПК
+        /// </summary>
+        /// <param name="pcToken"> Токен компьютера </param>
+        /// <returns> Вызывает событие Updated, в котором возвращаются новые значения состояния</returns>
+        public async Task Update(string pcToken) {
 			var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/update");
 			request.Method = "POST";
 
