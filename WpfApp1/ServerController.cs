@@ -49,9 +49,9 @@ namespace WpfApp1
 				}
 			}
 			response.Close();
-			if (token != null) {
-				Logged?.Invoke(this, new LoginEventArgs(token));
-			}
+			
+			Logged?.Invoke(this, new LoginEventArgs(token));
+			
         }
 
 		public async Task GetPCPost(string token) {
@@ -86,7 +86,7 @@ namespace WpfApp1
 			}
         }
 
-		public async Task AddPCPosc(string token, string name, int type) {
+		public async Task AddPCPost(string token, string name, int type) {
 			var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/add");
 			request.Method = "POST";
 
@@ -155,6 +155,7 @@ namespace WpfApp1
 			}
 
 			WebResponse response = await request.GetResponseAsync();
+			
 			UpdateRespType resp;
 			using (Stream stream = response.GetResponseStream())
 			{

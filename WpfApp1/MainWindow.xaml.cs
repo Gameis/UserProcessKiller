@@ -22,8 +22,8 @@ namespace WpfApp1
 		private PCInfoType[] pcs;
 		private string pcToken;
 
-		private bool isUse;
-		private long end;
+		private bool isUse = false;
+		private long end = -100;
 
 		public TextBlock TimeDisplay1 {
 			get => TimeDisplay;
@@ -52,9 +52,11 @@ namespace WpfApp1
 		}
 
 		private void OnUpdate(object sender, UpdateEventArgs e) {
+			Console.WriteLine($"before: {{\"isUse\":\"{isUse}\",\"end\":\"{end}\"}}");
 			isUse = e.isUse;
 			end = e.end;
-		}
+			Console.WriteLine($"after: {{\"isUse\":\"{isUse}\",\"end\":\"{end}\"}}");
+        }
 
 		private void OnConnected(object sender, ConnectedEventArgs e) {
 			pcToken = e.token;
@@ -183,7 +185,7 @@ namespace WpfApp1
 		private async void AddPC_OnClick(object sender, RoutedEventArgs e) {
 			AddPC adder = new AddPC();
 			adder.ShowDialog();
-			await _serverController.AddPCPosc(token, adder.nameVal, adder.typeVal);
+			await _serverController.AddPCPost(token, adder.nameVal, adder.typeVal);
 		}
 
 		private async void RandConnect_OnClick(object sender, RoutedEventArgs e) {
