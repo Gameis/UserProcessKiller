@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +11,12 @@ using Newtonsoft.Json;
 namespace WpfApp1
 {
     class ServerController {
-		private string serverUrl = "https://white-crow-api.herokuapp.com";
+		private string _serverUrl = "https://white-crow-api.herokuapp.com";
+
+        private string URL {
+			get => _serverUrl;
+			set => _serverUrl = value;
+		}
 
 		public delegate void LoginSuccess(object sender, LoginEventArgs e);
 		public delegate void GetPCsInfo(object sender, PCsInfoEventArgs e);
@@ -45,14 +51,25 @@ namespace WpfApp1
 		private long _updateTimeOut;
 		private string _pcToken;
 
-		public void SetPCToken(string pcToken) {
+        /// <summary>
+        /// Задание токена для функции Update
+        /// </summary>
+        /// <param name="pcToken">Токен текущего ПК</param>
+        public void SetPCToken(string pcToken) {
 			_pcToken = pcToken;
 		}
 
+		/// <summary>
+        /// Установка интервала вызова метода Update
+        /// </summary>
+        /// <param name="time"> количество микросекунд </param>
 		public void SetUpdateTimeOut(long time) {
 			_updateTimeOut = time;
 		}
 
+		/// <summary>
+        /// Запуск циклического выполнения метода Update
+        /// </summary>
 		public void UpdateStart() {
 			_tmCallback = new TimerCallback(AutoUpdate);
 			_timer = new Timer(_tmCallback, _pcToken,0,_updateTimeOut);
@@ -60,7 +77,7 @@ namespace WpfApp1
 
 		public async void AutoUpdate(object pcToken) {
 			try {
-				var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/update");
+				var request = WebRequest.Create(_serverUrl + "/api/v0.0/pc/update");
 				request.Method = "POST";
 
 				string rawData = $"{{\"token\":\"{(string)pcToken}\"}}";
@@ -91,7 +108,7 @@ namespace WpfApp1
 			}
 			catch (Exception ex) {
 				ErrorOccurred?.Invoke(this,
-									  new InvalidRequestEventArgs(ex, typeof(ServerController).GetMethod("LoginPost")?.Name));
+									  new InvalidRequestEventArgs(ex, "AutoUpdate"));
             }
 
         }
@@ -104,7 +121,7 @@ namespace WpfApp1
         /// <returns> Вызывает событие Logged, в которое передает Токен полученный с сервера</returns>
         public async Task LoginPost(string email, string password) {
 			try {
-				var request = WebRequest.Create(serverUrl + "/api/v0.0/login");
+				var request = WebRequest.Create(_serverUrl + "/api/v0.0/login");
 				request.Method = "POST";
 
 				var loginParam = new LoginPostType(email, password);
@@ -131,12 +148,16 @@ namespace WpfApp1
 					}
 				}
 				response.Close();
-			
+				if (string.IsNullOrEmpty(token)) {
+					token = null;
+					token.GetEnumerator();
+				}
+
 				Logged?.Invoke(this, new LoginEventArgs(token));
 			}
 			catch (Exception ex) {
 				ErrorOccurred?.Invoke(this,
-									  new InvalidRequestEventArgs(ex, typeof(ServerController).GetMethod("LoginPost")?.Name));
+									  new InvalidRequestEventArgs(ex, "LoginPost"));
             }
 
         }
@@ -148,7 +169,7 @@ namespace WpfApp1
         /// <returns> Вызывает событие PCsInfoReceived, в котором передает список ПК</returns>
         public async Task GetPCPost(string token) {
 			try {
-				var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/get");
+				var request = WebRequest.Create(_serverUrl + "/api/v0.0/pc/get");
 				request.Method = "POST";
 
 				string rawData = "{\"token\":\"" + token + "\"}";
@@ -180,13 +201,13 @@ namespace WpfApp1
 			}
 			catch (Exception ex) {
 				ErrorOccurred?.Invoke(this,
-									  new InvalidRequestEventArgs(ex, typeof(ServerController).GetMethod("GetPCPost")?.Name));
+									  new InvalidRequestEventArgs(ex, "GetPCPost"));
             }
         }
 
 		public async Task AddPCPost(string token, string name, int type) {
 			try {
-				var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/add");
+				var request = WebRequest.Create(_serverUrl + "/api/v0.0/pc/add");
 				request.Method = "POST";
 
 				string rawData = JsonConvert.SerializeObject(new AddPCPostType(token, name, type));
@@ -206,7 +227,7 @@ namespace WpfApp1
 			}
 			catch (Exception ex) {
 				ErrorOccurred?.Invoke(this,
-									  new InvalidRequestEventArgs(ex, typeof(ServerController).GetMethod("AddPCPost")?.Name));
+									  new InvalidRequestEventArgs(ex, "AddPCPost"));
             }
         }
 
@@ -218,7 +239,7 @@ namespace WpfApp1
         /// <returns> Вызывает событие PCConnected, в котором возвращается токен компьютера </returns>
         public async Task ConnectPost(string token, long id) {
 			try {
-				var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/connect");
+				var request = WebRequest.Create(_serverUrl + "/api/v0.0/pc/connect");
 				request.Method = "POST";
 
 				string rawData = JsonConvert.SerializeObject(new ConnectPostType(token, id));
@@ -250,7 +271,7 @@ namespace WpfApp1
 			}
 			catch (Exception ex) {
 				ErrorOccurred?.Invoke(this,
-									  new InvalidRequestEventArgs(ex, typeof(ServerController).GetMethod("ConnectPost")?.Name));
+									  new InvalidRequestEventArgs(ex, "ConnectPost"));
             }
         }
 
@@ -261,7 +282,7 @@ namespace WpfApp1
         /// <returns> Вызывает событие Updated, в котором возвращаются новые значения состояния</returns>
         public async Task Update(string pcToken) {
 			try {
-				var request = WebRequest.Create(serverUrl + "/api/v0.0/pc/update");
+				var request = WebRequest.Create(_serverUrl + "/api/v0.0/pc/update");
 				request.Method = "POST";
 
 				string rawData = $"{{\"token\":\"{pcToken}\"}}";
@@ -292,10 +313,8 @@ namespace WpfApp1
             }
 			catch (Exception ex) {
 				ErrorOccurred?.Invoke(this, 
-									  new InvalidRequestEventArgs(ex, typeof(ServerController).GetMethod("Update")?.Name));
+									  new InvalidRequestEventArgs(ex, "Update"));
 			}
         }
 	}
-
-	
 }

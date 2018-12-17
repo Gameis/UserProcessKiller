@@ -56,7 +56,7 @@ namespace WpfApp1
 			Message = info.Message;
 			_toStringResult = info.ToString();
 			Source = info.Source;
-			
+			MethodName = methodName;
 		}
 
 		public override string ToString() {

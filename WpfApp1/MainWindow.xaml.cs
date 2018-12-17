@@ -44,11 +44,17 @@ namespace WpfApp1
 			_serverController.PCsInfoReceived += OnPCReceived;
 			_serverController.PCConnected += OnConnected;
 			_serverController.Updated += OnUpdate;
+			_serverController.ErrorOccurred += OnErrorOccured;
 
 			Closing += OnClosingWindow;
 			_hooks.SetLowLevelProcToLib();
             _hooks.AllowAccessibilityShortcutKeys(false);
 			_hooks.Hooked = false;
+		}
+
+		private void OnErrorOccured(object sender, InvalidRequestEventArgs e) {
+			Console.WriteLine($"Method name: {e.MethodName}");
+			Console.WriteLine($"Discription: {e.ToString()}");
 		}
 
 		private void OnUpdate(object sender, UpdateEventArgs e) {
@@ -163,7 +169,7 @@ namespace WpfApp1
 
 
 		private async void SendLoginReq_OnClick(object sender, RoutedEventArgs e) {
-			await _serverController.LoginPost("log", "pass");
+			await _serverController.LoginPost("log in", "pass");
 			Console.WriteLine($"token: {token}");
 		}
 
